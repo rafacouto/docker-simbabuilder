@@ -11,7 +11,7 @@ ENV HOME_DIR=/usr/local/simba
 RUN apt-get update \
     && basicDeps=' \
         sudo \
-        unrar \
+        unrar-free \
         unzip \
         wget \
         ' \
@@ -39,6 +39,7 @@ RUN apt-get update \
         python \
         python-pip \
         python-pyelftools \
+        python3-minimal \
         texinfo \
         valgrind \
         ' \
@@ -53,7 +54,7 @@ RUN apt-get update \
         bossa-cli \
         gcc-arm-none-eabi \
         ' \
-    DEBIAN_FRONTEND=noninteractive \
+    && DEBIAN_FRONTEND=noninteractive \
         apt-get install -qy $basicDeps $develDeps $avrDeps $armDeps \
     && rm -rf /var/lib/apt/lists/*
 
@@ -68,14 +69,16 @@ USER simba
 WORKDIR $HOME_DIR
 
 # ESP32 SDK
-RUN xtensa-version='1.22.0-59' \
-    && dist-url='https://dl.espressif.com/dl' \
-    && dist-tgz="xtensa-esp32-elf-linux64-${$xtensa-version}.tar.gz" \
-    && curl "${$dist-url}/${dist-tgz}" | tar xzvf 
+ADD dist/esp32/xtensa-esp32-elf-linux64-1.22.0-59.tar.gz $HOME_DIR
 
 # ESP8266 SDK
 RUN git clone --recursive https://github.com/pfalcon/esp-open-sdk \
-    && pushd . && cd esp-open-sdk && make && popd
+    && cd esp-open-sdk && make && cd $HOME_DIR
 
 # ToDo: download S32 SDK from NXP
+
+# Simba sources
+RUN git clone --recursive https://github.com/eerimoq/simba 
+    
+
 
